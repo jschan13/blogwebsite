@@ -1232,6 +1232,7 @@ button, input, textarea { font-family: inherit; }
 <script>
 /* ─── DATA ───────────────────────────────────────────── */
 const ARTICLES = {
+  post:{post1:{title:'jjjjjThe Slow Collapse of Expertise in the Digital Age',author:'Eleanor Marsh',date:'March 22, 2025',readTime:'8 min',tag:'Culture',deck:'When everyone can publish instantly, what happens to the careful accumulation of knowledge?'}},
   expertise: {
     tag:'Culture', readTime:'8 min', title:'The Slow Collapse of Expertise in the Digital Age',
     deck:'When everyone can publish instantly, what happens to the careful accumulation of knowledge?',
@@ -1248,7 +1249,8 @@ const ARTICLES = {
     <p>The honest answer is that we don't yet have a replacement. We are living through the interregnum — the period between the collapse of old epistemic institutions and the emergence of whatever comes next. That is uncomfortable. It is also genuinely interesting.</p>
     <h2>Reasons for Cautious Optimism</h2>
     <p>Not everything in this picture is grim. The democratisation of publishing has surfaced knowledge that would never have reached a mainstream audience. Scientists now communicate directly with curious non-experts. Specialists in obscure fields have found global audiences. The transaction costs of sharing knowledge have fallen dramatically.</p>
-    <p>What we need are not better gatekeepers but better filters — tools and practices that help people navigate abundance without simply reinstating hierarchy. That is a design problem as much as a political one, and design problems have solutions.</p>`,
+    <p>What we need are not better gatekeepers but better filters — tools and practices that help people navigate abundance without simply reinstating hierarchy. That is a design problem as much as a political one, and design problems have solutions.</p>
+    <p>my name is jss</p>`,
     tags:['Culture','Media','Technology','Epistemology']
   },
   cities: {
@@ -1360,7 +1362,12 @@ const ARTICLES = {
   }
 };
 
+
+
+
+
 const ALL_POSTS = [
+  {slug:'post',tag:'Long-form', category:'culture'},
   {slug:'expertise', tag:'culture', category:'culture'},
   {slug:'cities',   tag:'Urban Life', category:'culture'},
   {slug:'sleep',    tag:'science',  category:'science'},
