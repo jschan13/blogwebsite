@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Meridian — Ideas Worth Reading</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+<style>
+/* ─── DESIGN TOKENS ─────────────────────────────────── */
+:root {
+  --ink:        #0f0f0f;
+  --ink-light:  #3a3a3a;
+  --ink-faint:  #888;
+  --paper:      #faf8f4;
+  --paper-warm: #f2ede5;
+  --rule:       #d4cfc8;
+  --accent:     #1a5c3a;
+  --accent-lt:  #e8f2ec;
+  --accent-dim: #2d7a52;
+  --white:      #ffffff;
+  --ff-display: 'Playfair Display', Georgia, serif;
+  --ff-body:    'Source Serif 4', Georgia, serif;
+  --ff-mono:    'DM Mono', monospace;
+  --max-w:      1140px;
+  --col:        680px;
+  --radius:     4px;
+  --transition: .22s cubic-bezier(.4,0,.2,1);
+}
+/* ─── RESET ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 18px; }
+body { font-family: var(--ff-body); background: var(--paper); color: var(--ink); line-height: 1.72; -webkit-font-smoothing: antialiased; }
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; text-decoration: none; }
+button, input, textarea { font-family: inherit; }
+
+/* ─── PAGES (SPA router) ─────────────────────────────── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ─── SITE HEADER ─────────────────────────────────────── */
+.site-header {
+  background: var(--ink);
+  color: var(--white);
+  padding: 0 24px;
+  position: sticky; top: 0; z-index: 100;
+  border-bottom: 2px solid var(--accent);
+}
+.header-inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  height: 64px;
+}
+.site-logo {
+  font-family: var(--ff-display);
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+  color: var(--white);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.site-logo span { color: var(--accent-dim); }
+.site-nav { display: flex; gap: 4px; align-items: center; flex: 1; }
+.nav-link {
+  font-family: var(--ff-mono);
+  font-size: .72rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.6);
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  transition: color var(--transition), background var(--transition);
+  cursor: pointer;
+}
+.nav-link:hover, .nav-link.active {
+  color: var(--white);
+  background: rgba(255,255,255,.1);
+}
+.nav-link.active { color: var(--accent-dim); }
+.header-cta {
+  margin-left: auto;
+  background: var(--accent);
+  color: var(--white);
+  font-family: var(--ff-mono);
+  font-size: .68rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 8px 18px;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition);
+  white-space: nowrap;
+}
+.header-cta:hover { background: var(--accent-dim); }
+.hamburger { display: none; background: none; border: none; cursor: pointer; padding: 4px; }
+.hamburger span { display: block; width: 22px; height: 2px; background: var(--white); margin: 5px 0; border-radius: 2px; transition: var(--transition); }
+
+/* ─── MOBILE NAV ─────────────────────────────────────── */
+@media (max-width: 720px) {
+  .site-nav, .header-cta { display: none; }
+  .hamburger { display: block; margin-left: auto; }
+  .mobile-menu {
+    position: fixed; top: 64px; left: 0; right: 0; bottom: 0;
+    background: var(--ink); z-index: 99;
+    padding: 32px 24px;
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu .nav-link { font-size: .9rem; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,.1); border-radius: 0; }
+}
+
+/* ─── MASTHEAD BANNER ─────────────────────────────────── */
+.masthead {
+  background: var(--paper-warm);
+  border-bottom: 1px solid var(--rule);
+  text-align: center;
+  padding: 8px 24px;
+  font-family: var(--ff-mono);
+  font-size: .65rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.masthead b { color: var(--accent); font-weight: 400; }
+
+/* ─── HERO (HOME) ─────────────────────────────────────── */
+.hero {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 72px 24px 56px;
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 64px;
+  align-items: start;
+}
+.hero-feature { border-top: 3px solid var(--ink); padding-top: 20px; }
+.hero-feature .eyebrow {
+  font-family: var(--ff-mono);
+  font-size: .65rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero-feature .eyebrow::after { content:''; flex: 1; height: 1px; background: var(--rule); }
+.hero-title {
+  font-family: var(--ff-display);
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  line-height: 1.1;
+  font-weight: 900;
+  letter-spacing: -.02em;
+  margin-bottom: 20px;
+}
+.hero-title em { font-style: italic; color: var(--accent); }
+.hero-excerpt {
+  font-size: 1.05rem;
+  color: var(--ink-light);
+  margin-bottom: 28px;
+  max-width: 520px;
+  line-height: 1.75;
+}
+.hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-family: var(--ff-mono);
+  font-size: .65rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.hero-meta a { color: var(--accent); cursor: pointer; }
+.hero-img {
+  aspect-ratio: 4/3;
+  background: var(--ink);
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+}
+.hero-img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--ff-display);
+  font-style: italic;
+  font-size: 1.1rem;
+  color: rgba(255,255,255,.3);
+  padding: 24px;
+  text-align: center;
+}
+.hero-sidebar { padding-top: 0; }
+.sidebar-rule { border: none; border-top: 3px solid var(--ink); margin-bottom: 20px; }
+.sidebar-title {
+  font-family: var(--ff-mono);
+  font-size: .65rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 20px;
+}
+
+/* ─── MINI CARDS (sidebar) ──────────────────────────── */
+.mini-card {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.mini-card:last-of-type { border-bottom: none; }
+.mini-card:hover .mc-title { color: var(--accent); }
+.mc-tag {
+  font-family: var(--ff-mono);
+  font-size: .6rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.mc-title {
+  font-family: var(--ff-display);
+  font-size: .95rem;
+  font-weight: 700;
+  line-height: 1.3;
+  transition: color var(--transition);
+}
+.mc-date { font-family: var(--ff-mono); font-size: .6rem; color: var(--ink-faint); margin-top: 6px; }
+
+/* ─── SECTION DIVIDER ─────────────────────────────────── */
+.section-header {
+  max-width: var(--max-w);
+  margin: 0 auto 32px;
+  padding: 40px 24px 0;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.section-header h2 {
+  font-family: var(--ff-mono);
+  font-size: .7rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.section-header hr { flex: 1; border: none; border-top: 1px solid var(--rule); }
+.section-header a {
+  font-family: var(--ff-mono);
+  font-size: .62rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* ─── POST GRID ──────────────────────────────────────── */
+.post-grid {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 24px 80px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px 36px;
+}
+@media (max-width: 900px) { .post-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 580px) { .post-grid { grid-template-columns: 1fr; gap: 32px; } }
+
+.post-card { cursor: pointer; }
+.post-card:hover .pc-title { color: var(--accent); }
+.post-card:hover .pc-thumb { transform: scale(1.02); }
+.pc-thumb-wrap { overflow: hidden; border-radius: var(--radius); margin-bottom: 16px; aspect-ratio: 16/9; background: var(--paper-warm); }
+.pc-thumb {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .4s ease;
+}
+.pc-thumb svg { width: 100%; height: 100%; }
+.pc-tag {
+  font-family: var(--ff-mono);
+  font-size: .6rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.pc-title {
+  font-family: var(--ff-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 8px;
+  transition: color var(--transition);
+}
+.pc-excerpt { font-size: .88rem; color: var(--ink-light); line-height: 1.65; margin-bottom: 12px; }
+.pc-meta { font-family: var(--ff-mono); font-size: .6rem; color: var(--ink-faint); letter-spacing: .06em; }
+.pc-meta b { color: var(--ink-light); font-weight: 400; }
+
+/* ─── FEATURED STRIP ─────────────────────────────────── */
+.featured-strip {
+  background: var(--ink);
+  color: var(--white);
+  padding: 56px 24px;
+  margin: 0 0 56px;
+}
+.strip-inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+.strip-label {
+  font-family: var(--ff-mono);
+  font-size: .65rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--accent-dim);
+  margin-bottom: 16px;
+}
+.strip-title {
+  font-family: var(--ff-display);
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+.strip-text { font-size: .95rem; color: rgba(255,255,255,.7); margin-bottom: 24px; line-height: 1.72; }
+.strip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: var(--white);
+  font-family: var(--ff-mono);
+  font-size: .68rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 12px 22px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  border: none;
+  transition: background var(--transition);
+}
+.strip-btn:hover { background: var(--accent-dim); }
+.strip-graphic {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.sg-box {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--radius);
+  padding: 20px 16px;
+}
+.sg-num {
+  font-family: var(--ff-display);
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--accent-dim);
+  line-height: 1;
+}
+.sg-label { font-family: var(--ff-mono); font-size: .6rem; letter-spacing: .1em; color: rgba(255,255,255,.45); text-transform: uppercase; margin-top: 6px; }
+@media (max-width: 720px) { .strip-inner { grid-template-columns: 1fr; gap: 32px; } .hero { grid-template-columns: 1fr; } .hero-sidebar { border-top: 1px solid var(--rule); padding-top: 32px; } }
+
+/* ─── NEWSLETTER BAR ─────────────────────────────────── */
+.newsletter-bar {
+  background: var(--accent-lt);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding: 40px 24px;
+  margin-bottom: 0;
+}
+.nl-inner {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+.nl-title { font-family: var(--ff-display); font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; }
+.nl-sub { font-size: .9rem; color: var(--ink-light); margin-bottom: 24px; }
+.nl-form { display: flex; gap: 10px; max-width: 420px; margin: 0 auto; }
+.nl-form input {
+  flex: 1;
+  border: 1.5px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  font-size: .9rem;
+  background: var(--white);
+  outline: none;
+  transition: border-color var(--transition);
+}
+.nl-form input:focus { border-color: var(--accent); }
+.nl-form button {
+  background: var(--accent);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius);
+  padding: 10px 20px;
+  font-family: var(--ff-mono);
+  font-size: .68rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--transition);
+  white-space: nowrap;
+}
+.nl-form button:hover { background: var(--accent-dim); }
+@media (max-width: 480px) { .nl-form { flex-direction: column; } }
+
+/* ─── FOOTER ─────────────────────────────────────────── */
+.site-footer {
+  background: var(--ink);
+  color: rgba(255,255,255,.45);
+  padding: 56px 24px 32px;
+}
+.footer-inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 48px;
+}
+@media (max-width: 840px) { .footer-inner { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 480px) { .footer-inner { grid-template-columns: 1fr; } }
+.footer-brand p { font-size: .88rem; line-height: 1.65; margin-top: 12px; max-width: 280px; }
+.footer-col h4 {
+  font-family: var(--ff-mono);
+  font-size: .62rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.7);
+  margin-bottom: 16px;
+}
+.footer-col ul { list-style: none; }
+.footer-col li { margin-bottom: 8px; }
+.footer-col a { font-size: .85rem; cursor: pointer; transition: color var(--transition); }
+.footer-col a:hover { color: var(--white); }
+.footer-bottom {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--ff-mono);
+  font-size: .6rem;
+  letter-spacing: .08em;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.footer-bottom a { cursor: pointer; }
+.footer-bottom a:hover { color: var(--white); }
+
+/* ─── BLOG INDEX PAGE ─────────────────────────────────── */
+.blog-hero {
+  background: var(--ink);
+  color: var(--white);
+  padding: 64px 24px;
+  text-align: center;
+  border-bottom: 3px solid var(--accent);
+}
+.blog-hero-label { font-family: var(--ff-mono); font-size: .65rem; letter-spacing: .16em; text-transform: uppercase; color: var(--accent-dim); margin-bottom: 16px; }
+.blog-hero h1 { font-family: var(--ff-display); font-size: clamp(2rem,5vw,3rem); font-weight: 900; }
+.blog-hero p { color: rgba(255,255,255,.6); font-size: .95rem; margin-top: 12px; }
+
+.filter-bar {
+  max-width: var(--max-w);
+  margin: 32px auto 0;
+  padding: 0 24px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.filter-btn {
+  font-family: var(--ff-mono);
+  font-size: .62rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 7px 16px;
+  border-radius: 99px;
+  border: 1.5px solid var(--rule);
+  background: transparent;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--ink-faint);
+}
+.filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+.filter-btn.active { background: var(--accent); border-color: var(--accent); color: var(--white); }
+
+.blog-grid {
+  max-width: var(--max-w);
+  margin: 32px auto 80px;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px 36px;
+}
+@media (max-width: 900px) { .blog-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 540px) { .blog-grid { grid-template-columns: 1fr; } }
+
+.blog-card { cursor: pointer; border-top: 2px solid var(--ink); padding-top: 20px; }
+.blog-card:hover .bc-title { color: var(--accent); }
+.bc-tag { font-family: var(--ff-mono); font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+.bc-title { font-family: var(--ff-display); font-size: 1.2rem; font-weight: 700; line-height: 1.28; margin-bottom: 10px; transition: color var(--transition); }
+.bc-excerpt { font-size: .88rem; color: var(--ink-light); line-height: 1.65; margin-bottom: 14px; }
+.bc-meta { font-family: var(--ff-mono); font-size: .6rem; color: var(--ink-faint); display: flex; gap: 12px; }
+.bc-meta span::before { content:'· '; }
+.bc-meta span:first-child::before { content: ''; }
+
+/* ─── SINGLE ARTICLE PAGE ─────────────────────────────── */
+.article-wrap { max-width: 1000px; margin: 0 auto; padding: 0 24px 80px; }
+.article-header {
+  max-width: var(--col);
+  margin: 0 auto;
+  padding: 64px 0 40px;
+  border-bottom: 1px solid var(--rule);
+}
+.article-eyebrow {
+  font-family: var(--ff-mono);
+  font-size: .65rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.article-eyebrow span { color: var(--ink-faint); }
+.article-title {
+  font-family: var(--ff-display);
+  font-size: clamp(1.9rem, 4vw, 2.9rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -.02em;
+  margin-bottom: 20px;
+}
+.article-title em { font-style: italic; color: var(--accent); }
+.article-deck { font-size: 1.1rem; font-style: italic; color: var(--ink-light); line-height: 1.65; margin-bottom: 24px; }
+.article-byline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.byline-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ff-display);
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--white);
+  flex-shrink: 0;
+}
+.byline-text { font-family: var(--ff-mono); font-size: .62rem; letter-spacing: .06em; }
+.byline-text strong { display: block; color: var(--ink); text-transform: uppercase; margin-bottom: 2px; }
+
+.article-img {
+  max-width: 860px;
+  margin: 40px auto;
+  aspect-ratio: 16/7;
+  background: linear-gradient(135deg, #1a2e22 0%, #0f0f0f 100%);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--ff-display);
+  font-style: italic;
+  color: rgba(255,255,255,.25);
+  font-size: 1rem;
+}
+
+.article-body {
+  max-width: var(--col);
+  margin: 0 auto;
+  font-size: 1.05rem;
+  line-height: 1.82;
+}
+.article-body p { margin-bottom: 1.5em; }
+.article-body h2 { font-family: var(--ff-display); font-size: 1.5rem; font-weight: 700; margin: 2.5em 0 .8em; border-top: 1px solid var(--rule); padding-top: 1.5em; }
+.article-body h3 { font-family: var(--ff-display); font-size: 1.2rem; font-weight: 700; margin: 2em 0 .6em; }
+.article-body blockquote {
+  border-left: 4px solid var(--accent);
+  padding: 20px 28px;
+  margin: 2em 0;
+  background: var(--paper-warm);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--ink-light);
+}
+.article-body a { color: var(--accent); border-bottom: 1px solid var(--accent-dim); transition: border-color var(--transition); }
+.article-body a:hover { border-color: var(--accent); }
+.article-body ul, .article-body ol { padding-left: 1.5em; margin-bottom: 1.5em; }
+.article-body li { margin-bottom: .4em; }
+.article-body strong { font-weight: 600; color: var(--ink); }
+.article-body code { font-family: var(--ff-mono); font-size: .88em; background: var(--paper-warm); padding: 2px 6px; border-radius: 3px; }
+.article-tags { max-width: var(--col); margin: 40px auto 0; padding-top: 24px; border-top: 1px solid var(--rule); display: flex; gap: 8px; flex-wrap: wrap; }
+.tag-pill {
+  font-family: var(--ff-mono);
+  font-size: .6rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border: 1.5px solid var(--rule);
+  border-radius: 99px;
+  color: var(--ink-faint);
+}
+
+/* ─── ABOUT PAGE ─────────────────────────────────────── */
+.about-hero {
+  background: var(--ink);
+  color: var(--white);
+  padding: 80px 24px 64px;
+  position: relative;
+  overflow: hidden;
+}
+.about-hero::before {
+  content: 'ABOUT';
+  position: absolute;
+  top: -24px; right: -10px;
+  font-family: var(--ff-display);
+  font-size: 15rem;
+  font-weight: 900;
+  color: rgba(255,255,255,.03);
+  pointer-events: none;
+  line-height: 1;
+}
+.about-hero-inner { max-width: 680px; margin: 0 auto; position: relative; }
+.about-label { font-family: var(--ff-mono); font-size: .65rem; letter-spacing: .16em; text-transform: uppercase; color: var(--accent-dim); margin-bottom: 20px; }
+.about-hero h1 { font-family: var(--ff-display); font-size: clamp(2rem,4vw,2.8rem); font-weight: 900; line-height: 1.15; margin-bottom: 20px; }
+.about-hero h1 em { font-style: italic; color: var(--accent-dim); }
+.about-hero p { color: rgba(255,255,255,.65); font-size: 1.05rem; line-height: 1.75; }
+
+.about-content { max-width: 840px; margin: 0 auto; padding: 64px 24px; }
+.about-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 64px; align-items: start; }
+@media (max-width: 680px) { .about-grid { grid-template-columns: 1fr; } }
+.about-body { font-size: 1.02rem; line-height: 1.82; }
+.about-body p { margin-bottom: 1.4em; }
+.about-body h2 { font-family: var(--ff-display); font-size: 1.35rem; font-weight: 700; margin: 2em 0 .6em; }
+.values-box { background: var(--paper-warm); border: 1px solid var(--rule); border-radius: var(--radius); padding: 28px; }
+.values-box h3 { font-family: var(--ff-mono); font-size: .65rem; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 20px; color: var(--ink-faint); }
+.value-item { padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.value-item:last-child { border-bottom: none; }
+.value-item strong { display: block; font-family: var(--ff-display); font-size: .95rem; font-weight: 700; margin-bottom: 4px; }
+.value-item span { font-size: .82rem; color: var(--ink-light); }
+
+.team-section { max-width: 840px; margin: 0 auto; padding: 0 24px 80px; }
+.team-section h2 { font-family: var(--ff-mono); font-size: .65rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-faint); border-top: 1px solid var(--rule); padding-top: 32px; margin-bottom: 32px; }
+.team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+@media (max-width: 680px) { .team-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 400px) { .team-grid { grid-template-columns: 1fr; } }
+.team-card { }
+.team-avatar {
+  width: 72px; height: 72px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ff-display); font-size: 1.4rem; font-weight: 900;
+  color: var(--white); margin-bottom: 16px;
+}
+.team-name { font-family: var(--ff-display); font-size: 1rem; font-weight: 700; }
+.team-role { font-family: var(--ff-mono); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin: 4px 0 8px; }
+.team-bio { font-size: .84rem; color: var(--ink-light); line-height: 1.6; }
+
+/* ─── CONTACT PAGE ─────────────────────────────────────── */
+.contact-hero { background: var(--paper-warm); border-bottom: 1px solid var(--rule); padding: 64px 24px; text-align: center; }
+.contact-hero h1 { font-family: var(--ff-display); font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 900; margin-bottom: 12px; }
+.contact-hero p { color: var(--ink-light); font-size: .95rem; }
+.contact-wrap {
+  max-width: 900px; margin: 56px auto 80px; padding: 0 24px;
+  display: grid; grid-template-columns: 1fr 360px; gap: 64px; align-items: start;
+}
+@media (max-width: 720px) { .contact-wrap { grid-template-columns: 1fr; } }
+.contact-form { }
+.form-group { margin-bottom: 24px; }
+.form-label { font-family: var(--ff-mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); display: block; margin-bottom: 8px; }
+.form-input, .form-textarea {
+  width: 100%;
+  border: 1.5px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  font-family: var(--ff-body);
+  font-size: .92rem;
+  background: var(--white);
+  color: var(--ink);
+  outline: none;
+  transition: border-color var(--transition);
+}
+.form-input:focus, .form-textarea:focus { border-color: var(--accent); }
+.form-textarea { min-height: 160px; resize: vertical; }
+.form-submit {
+  background: var(--accent);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius);
+  padding: 14px 32px;
+  font-family: var(--ff-mono);
+  font-size: .7rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.form-submit:hover { background: var(--accent-dim); }
+.form-success { display: none; background: var(--accent-lt); border: 1px solid var(--accent); border-radius: var(--radius); padding: 16px 20px; font-size: .9rem; color: var(--accent); }
+.contact-info h2 { font-family: var(--ff-display); font-size: 1.3rem; font-weight: 700; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid var(--ink); }
+.info-item { padding: 16px 0; border-bottom: 1px solid var(--rule); }
+.info-item:last-of-type { border-bottom: none; }
+.info-label { font-family: var(--ff-mono); font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 4px; }
+.info-value { font-size: .92rem; color: var(--ink); }
+
+/* ─── TOAST ──────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 32px; right: 32px;
+  background: var(--ink); color: var(--white);
+  padding: 14px 20px; border-radius: var(--radius);
+  font-family: var(--ff-mono); font-size: .72rem; letter-spacing: .06em;
+  border-left: 4px solid var(--accent);
+  transform: translateY(16px); opacity: 0;
+  transition: all .3s ease;
+  z-index: 999;
+  pointer-events: none;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* ─── BACK TO TOP + READ MORE ─────────────────────────── */
+.btn-text {
+  background: none; border: none; cursor: pointer;
+  font-family: var(--ff-mono); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--accent); padding: 0; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-text:hover { text-decoration: underline; }
+.btn-outline {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1.5px solid var(--ink); border-radius: var(--radius);
+  padding: 11px 22px; background: transparent; cursor: pointer;
+  font-family: var(--ff-mono); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink); transition: var(--transition);
+}
+.btn-outline:hover { background: var(--ink); color: var(--white); }
+.load-more-wrap { text-align: center; margin: 0 0 80px; padding: 0 24px; }
+
+/* ─── READING PROGRESS ─────────────────────────────────── */
+.reading-bar {
+  position: fixed; top: 0; left: 0;
+  height: 3px; background: var(--accent);
+  width: 0%; z-index: 200;
+  transition: width .1s;
+}
+
+/* ─── UTILITIES ──────────────────────────────────────── */
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+/* ─── PLACEHOLDER ART ─────────────────────────────────── */
+.art-1 { background: linear-gradient(135deg,#1a3028 0%,#0d1f18 100%); }
+.art-2 { background: linear-gradient(135deg,#1f1a30 0%,#0d0e20 100%); }
+.art-3 { background: linear-gradient(135deg,#301a1a 0%,#1a0d0d 100%); }
+.art-4 { background: linear-gradient(135deg,#1a2a30 0%,#0d1820 100%); }
+.art-5 { background: linear-gradient(135deg,#2a2a1a 0%,#1a1a0d 100%); }
+.art-6 { background: linear-gradient(135deg,#1a1a2a 0%,#0d0d1a 100%); }
+
+/* ─── SCROLL ANIMATION ─────────────────────────────────── */
+.fade-up { opacity: 0; transform: translateY(24px); transition: opacity .5s ease, transform .5s ease; }
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- Reading progress bar -->
+<div class="reading-bar" id="readingBar"></div>
+
+<!-- Mobile Nav Menu -->
+<nav class="mobile-menu" id="mobileMenu">
+  <span class="nav-link" onclick="navigate('home')">Home</span>
+  <span class="nav-link" onclick="navigate('blog')">Blog</span>
+  <span class="nav-link" onclick="navigate('about')">About</span>
+  <span class="nav-link" onclick="navigate('contact')">Contact</span>
+</nav>
+
+<!-- Site Header -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="site-logo" onclick="navigate('home')" style="cursor:pointer">The<span>Meridian</span></div>
+    <nav class="site-nav">
+      <span class="nav-link" id="nav-home"   onclick="navigate('home')">Home</span>
+      <span class="nav-link" id="nav-blog"   onclick="navigate('blog')">Blog</span>
+      <span class="nav-link" id="nav-about"  onclick="navigate('about')">About</span>
+      <span class="nav-link" id="nav-contact" onclick="navigate('contact')">Contact</span>
+    </nav>
+    <button class="header-cta" onclick="navigate('contact')">Get in Touch</button>
+    <button class="hamburger" id="hamburger" aria-label="Menu" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- Masthead -->
+<div class="masthead">
+  Independent journalism &amp; ideas · Est. 2024 · <b>New issue every Wednesday</b>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- HOME PAGE                                             -->
+<!-- ══════════════════════════════════════════════════════ -->
+<main class="page active" id="page-home">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-feature">
+      <div class="eyebrow">Featured Essay</div>
+      <h1 class="hero-title">The <em>Slow Collapse</em> of Expertise in the Digital Age</h1>
+      <p class="hero-excerpt">When everyone can publish instantly, what happens to the careful accumulation of knowledge? We investigate how internet culture is reshaping — and sometimes dismantling — the institutions that once verified what was true.</p>
+      <div class="hero-meta">
+        <span>By <a onclick="navigate('article',{slug:'expertise'})">Eleanor Marsh</a></span>
+        <span>·</span>
+        <span>March 22, 2025</span>
+        <span>·</span>
+        <span>8 min read</span>
+        <button class="btn-text" style="margin-left:auto" onclick="navigate('article',{slug:'expertise'})">Read →</button>
+      </div>
+    </div>
+    <aside class="hero-sidebar">
+      <hr class="sidebar-rule"/>
+      <div class="sidebar-title">Also in this issue</div>
+      <div class="mini-card" onclick="navigate('article',{slug:'cities'})">
+        <div class="mc-tag">Urban Life</div>
+        <div class="mc-title">Why the 15-Minute City Became a Culture War</div>
+        <div class="mc-date">March 19, 2025</div>
+      </div>
+      <div class="mini-card" onclick="navigate('article',{slug:'sleep'})">
+        <div class="mc-tag">Science</div>
+        <div class="mc-title">The Science of Sleep Debt Is More Complicated Than You Think</div>
+        <div class="mc-date">March 17, 2025</div>
+      </div>
+      <div class="mini-card" onclick="navigate('article',{slug:'design'})">
+        <div class="mc-tag">Design</div>
+        <div class="mc-title">Bauhaus at 100: What Architecture Got Wrong</div>
+        <div class="mc-date">March 14, 2025</div>
+      </div>
+      <div class="mini-card" onclick="navigate('article',{slug:'economy'})">
+        <div class="mc-tag">Economics</div>
+        <div class="mc-title">The Hidden Costs of Remote Work Nobody Talks About</div>
+        <div class="mc-date">March 11, 2025</div>
+      </div>
+    </aside>
+  </section>
+
+  <!-- Recent Posts -->
+  <div class="section-header">
+    <h2>Recent Posts</h2><hr/><a onclick="navigate('blog')">View all →</a>
+  </div>
+  <section class="post-grid">
+
+    <article class="post-card fade-up" onclick="navigate('article',{slug:'cities'})">
+      <div class="pc-thumb-wrap">
+        <div class="pc-thumb art-1">
+          <svg viewBox="0 0 320 180"><rect x="20" y="60" width="30" height="120" fill="rgba(255,255,255,.06)"/><rect x="60" y="40" width="30" height="140" fill="rgba(255,255,255,.09)"/><rect x="100" y="80" width="30" height="100" fill="rgba(255,255,255,.06)"/><rect x="140" y="30" width="40" height="150" fill="rgba(255,255,255,.12)"/><rect x="190" y="55" width="30" height="125" fill="rgba(255,255,255,.08)"/><rect x="230" y="70" width="30" height="110" fill="rgba(255,255,255,.06)"/><rect x="270" y="45" width="30" height="135" fill="rgba(255,255,255,.1)"/></svg>
+        </div>
+      </div>
+      <div class="pc-tag">Urban Life</div>
+      <h3 class="pc-title">Why the 15-Minute City Became a Culture War</h3>
+      <p class="pc-excerpt">A planning concept from the 1990s resurfaces and immediately becomes a flashpoint. What does the backlash reveal about our relationship to public space?</p>
+      <div class="pc-meta"><b>Elena Marsh</b> · <span>March 19</span> · <span>6 min</span></div>
+    </article>
+
+    <article class="post-card fade-up" onclick="navigate('article',{slug:'sleep'})">
+      <div class="pc-thumb-wrap">
+        <div class="pc-thumb art-2">
+          <svg viewBox="0 0 320 180"><circle cx="160" cy="90" r="60" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/><circle cx="160" cy="90" r="40" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="1"/><circle cx="160" cy="90" r="20" fill="rgba(255,255,255,.07)"/><line x1="160" y1="30" x2="160" y2="150" stroke="rgba(255,255,255,.05)" stroke-width="1"/><line x1="100" y1="90" x2="220" y2="90" stroke="rgba(255,255,255,.05)" stroke-width="1"/></svg>
+        </div>
+      </div>
+      <div class="pc-tag">Science</div>
+      <h3 class="pc-title">The Science of Sleep Debt Is More Complicated Than You Think</h3>
+      <p class="pc-excerpt">New research challenges the popular "sleep bank" model, suggesting our relationship with rest and recovery may be fundamentally non-linear.</p>
+      <div class="pc-meta"><b>Dr. Yusuf Adewale</b> · <span>March 17</span> · <span>7 min</span></div>
+    </article>
+
+    <article class="post-card fade-up" onclick="navigate('article',{slug:'design'})">
+      <div class="pc-thumb-wrap">
+        <div class="pc-thumb art-3">
+          <svg viewBox="0 0 320 180"><rect x="60" y="40" width="80" height="80" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="1"/><rect x="100" y="80" width="80" height="80" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/><line x1="60" y1="40" x2="140" y2="40" stroke="rgba(255,255,255,.2)" stroke-width="2"/><circle cx="220" cy="90" r="40" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/></svg>
+        </div>
+      </div>
+      <div class="pc-tag">Design</div>
+      <h3 class="pc-title">Bauhaus at 100: What Architecture Got Wrong</h3>
+      <p class="pc-excerpt">The movement promised to unite art and industry for the benefit of society. A century later, its legacy is more ambivalent than its champions admit.</p>
+      <div class="pc-meta"><b>Sofia Reinholt</b> · <span>March 14</span> · <span>9 min</span></div>
+    </article>
+
+  </section>
+
+  <!-- Featured Strip -->
+  <div class="featured-strip">
+    <div class="strip-inner">
+      <div>
+        <div class="strip-label">Long-form</div>
+        <h2 class="strip-title">In Depth: The Attention Economy and the Death of Boredom</h2>
+        <p class="strip-text">A special three-part investigation into how the race for engagement has reshaped not just media, but the basic structure of human consciousness and our capacity for sustained thought.</p>
+        <button class="strip-btn" onclick="navigate('article',{slug:'attention'})">Read the series →</button>
+      </div>
+      <div class="strip-graphic">
+        <div class="sg-box"><div class="sg-num">3</div><div class="sg-label">Part series</div></div>
+        <div class="sg-box"><div class="sg-num">42</div><div class="sg-label">Min read</div></div>
+        <div class="sg-box"><div class="sg-num">12k</div><div class="sg-label">Readers</div></div>
+        <div class="sg-box"><div class="sg-num">5★</div><div class="sg-label">Avg rating</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- More posts -->
+  <div class="section-header">
+    <h2>More to Read</h2><hr/>
+  </div>
+  <section class="post-grid">
+    <article class="post-card fade-up" onclick="navigate('article',{slug:'economy'})">
+      <div class="pc-thumb-wrap"><div class="pc-thumb art-4"><svg viewBox="0 0 320 180"><polyline points="20,150 80,100 140,120 200,60 280,40" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="2"/><polyline points="20,150 80,120 140,130 200,90 280,70" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="1.5"/></svg></div></div>
+      <div class="pc-tag">Economics</div>
+      <h3 class="pc-title">The Hidden Costs of Remote Work Nobody Talks About</h3>
+      <p class="pc-excerpt">Beyond commutes and coffee shops, a deeper accounting reveals surprising transfers of value — and burden — between employers, employees, and cities.</p>
+      <div class="pc-meta"><b>Marcus Chen</b> · <span>March 11</span> · <span>5 min</span></div>
+    </article>
+    <article class="post-card fade-up" onclick="navigate('article',{slug:'language'})">
+      <div class="pc-thumb-wrap"><div class="pc-thumb art-5"><svg viewBox="0 0 320 180"><text x="30" y="80" fill="rgba(255,255,255,.08)" font-size="48" font-family="serif">Aa</text><text x="140" y="130" fill="rgba(255,255,255,.06)" font-size="36" font-family="serif">Bb</text><text x="220" y="70" fill="rgba(255,255,255,.1)" font-size="56" font-family="serif">Cc</text></svg></div></div>
+      <div class="pc-tag">Language</div>
+      <h3 class="pc-title">How Languages Die: A Quiet Catastrophe</h3>
+      <p class="pc-excerpt">A language disappears roughly every two weeks. Each one carries within it an irreplaceable model of how humans can think about the world.</p>
+      <div class="pc-meta"><b>Amara Osei</b> · <span>March 8</span> · <span>11 min</span></div>
+    </article>
+    <article class="post-card fade-up" onclick="navigate('article',{slug:'privacy'})">
+      <div class="pc-thumb-wrap"><div class="pc-thumb art-6"><svg viewBox="0 0 320 180"><rect x="110" y="50" width="100" height="80" rx="8" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="1.5"/><circle cx="160" cy="90" r="15" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="1.5"/><line x1="160" y1="130" x2="160" y2="160" stroke="rgba(255,255,255,.08)" stroke-width="2"/></svg></div></div>
+      <div class="pc-tag">Technology</div>
+      <h3 class="pc-title">Privacy Is Dead. Here's Why That Matters Less Than You Think</h3>
+      <p class="pc-excerpt">The surveillance debates of the 2010s gave way to a collective shrug. What happened to our outrage, and was it ever the right response?</p>
+      <div class="pc-meta"><b>Eleanor Marsh</b> · <span>March 5</span> · <span>8 min</span></div>
+    </article>
+  </section>
+
+  <!-- Newsletter -->
+  <div class="newsletter-bar">
+    <div class="nl-inner">
+      <h2 class="nl-title">Ideas in your inbox, weekly.</h2>
+      <p class="nl-sub">No noise. Just one thoughtful essay every Wednesday morning.</p>
+      <form class="nl-form" onsubmit="subscribeNewsletter(event)">
+        <input type="email" placeholder="your@email.com" required/>
+        <button type="submit">Subscribe</button>
+      </form>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- BLOG INDEX PAGE                                       -->
+<!-- ══════════════════════════════════════════════════════ -->
+<main class="page" id="page-blog">
+  <div class="blog-hero">
+    <div class="blog-hero-label">All Articles</div>
+    <h1>The Meridian Blog</h1>
+    <p>In-depth essays on culture, science, economics and ideas</p>
+  </div>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterPosts('all',this)">All</button>
+    <button class="filter-btn" onclick="filterPosts('culture',this)">Culture</button>
+    <button class="filter-btn" onclick="filterPosts('science',this)">Science</button>
+    <button class="filter-btn" onclick="filterPosts('economics',this)">Economics</button>
+    <button class="filter-btn" onclick="filterPosts('design',this)">Design</button>
+    <button class="filter-btn" onclick="filterPosts('technology',this)">Technology</button>
+  </div>
+
+  <section class="blog-grid" id="blogGrid">
+    <!-- Cards injected by JS -->
+  </section>
+
+  <div class="load-more-wrap">
+    <button class="btn-outline" onclick="showToast('All articles loaded')">Load more articles</button>
+  </div>
+</main>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- ARTICLE PAGE                                          -->
+<!-- ══════════════════════════════════════════════════════ -->
+<main class="page" id="page-article">
+  <div class="article-wrap">
+    <div class="article-header">
+      <div class="article-eyebrow" id="artEyebrow">Culture <span>·</span> 8 min read</div>
+      <h1 class="article-title" id="artTitle">Article Title</h1>
+      <p class="article-deck" id="artDeck">Article deck / subtitle here.</p>
+      <div class="article-byline">
+        <div class="byline-avatar" id="artAvatar">EM</div>
+        <div class="byline-text">
+          <strong id="artAuthor">Eleanor Marsh</strong>
+          <span id="artDate">March 22, 2025</span>
+        </div>
+      </div>
+    </div>
+    <div class="article-img" id="artImg">Cover image</div>
+    <div class="article-body" id="artBody"></div>
+    <div class="article-tags" id="artTags"></div>
+    <div style="max-width:var(--col);margin:40px auto 0;padding-top:24px;border-top:1px solid var(--rule);display:flex;gap:12px;flex-wrap:wrap">
+      <button class="btn-outline" onclick="navigate('blog')" style="font-size:.62rem;padding:9px 16px">← Back to Blog</button>
+      <button class="btn-outline" onclick="navigate('home')" style="font-size:.62rem;padding:9px 16px">Home</button>
+    </div>
+  </div>
+
+  <!-- Newsletter on article page -->
+  <div class="newsletter-bar" style="margin-top:40px">
+    <div class="nl-inner">
+      <h2 class="nl-title">Enjoyed this piece?</h2>
+      <p class="nl-sub">Get thoughtful writing delivered to your inbox every week.</p>
+      <form class="nl-form" onsubmit="subscribeNewsletter(event)">
+        <input type="email" placeholder="your@email.com" required/>
+        <button type="submit">Subscribe</button>
+      </form>
+    </div>
+  </div>
+</main>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- ABOUT PAGE                                            -->
+<!-- ══════════════════════════════════════════════════════ -->
+<main class="page" id="page-about">
+  <div class="about-hero">
+    <div class="about-hero-inner">
+      <div class="about-label">About The Meridian</div>
+      <h1>We believe <em>good writing</em> still changes minds.</h1>
+      <p>The Meridian is an independent publication for curious people who want more than headlines. We publish long-form essays, reported features, and critical perspectives on the ideas shaping our world.</p>
+    </div>
+  </div>
+
+  <div class="about-content">
+    <div class="about-grid">
+      <div class="about-body">
+        <h2>Our Mission</h2>
+        <p>Founded in 2024, The Meridian started from a simple frustration: the internet has never made it easier to produce words, yet somehow it feels harder than ever to find writing that respects the reader's intelligence and time.</p>
+        <p>We take a different approach. Every piece we publish is reported, edited, and fact-checked. We don't chase trending topics or optimise for engagement metrics. We write about what we think matters, and we try to do it well.</p>
+        <p>Our readers span more than 40 countries. They are scientists, teachers, designers, engineers, and students. What they share is an appetite for ideas that don't fit on a bumper sticker.</p>
+        <h2>Editorial Independence</h2>
+        <p>The Meridian is reader-supported. We carry no advertising and accept no sponsored content. Our revenue comes entirely from subscriptions, which means our only obligation is to the people reading this.</p>
+        <p>We believe this model — unfashionable as it sometimes feels — is the only one that consistently produces writing worth reading. When your reader is your customer, you are accountable to them in the deepest possible sense.</p>
+      </div>
+      <div>
+        <div class="values-box">
+          <h3>What we stand for</h3>
+          <div class="value-item"><strong>Intellectual honesty</strong><span>We follow arguments where they lead, not where we'd prefer them to go.</span></div>
+          <div class="value-item"><strong>Depth over speed</strong><span>We'd rather be late and right than first and wrong.</span></div>
+          <div class="value-item"><strong>Reader respect</strong><span>We assume you can handle complexity, nuance, and uncertainty.</span></div>
+          <div class="value-item"><strong>Independence</strong><span>No advertisers, no sponsors, no external funders with editorial influence.</span></div>
+          <div class="value-item"><strong>Accountability</strong><span>We correct our mistakes prominently and without excuses.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="team-section">
+    <h2>The Team</h2>
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="team-avatar" style="background:var(--accent)">EM</div>
+        <div class="team-name">Eleanor Marsh</div>
+        <div class="team-role">Editor in Chief</div>
+        <p class="team-bio">Former foreign correspondent. Writes on culture, media, and the politics of knowledge.</p>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar" style="background:#2a4a8a">MC</div>
+        <div class="team-name">Marcus Chen</div>
+        <div class="team-role">Senior Editor</div>
+        <p class="team-bio">Economist by training. Covers labour, cities, and the changing nature of work.</p>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar" style="background:#7a2a4a">SR</div>
+        <div class="team-name">Sofia Reinholt</div>
+        <div class="team-role">Design & Culture</div>
+        <p class="team-bio">Architecture critic and essayist. Interested in how built environments shape behaviour.</p>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar" style="background:#4a3a2a">AO</div>
+        <div class="team-name">Amara Osei</div>
+        <div class="team-role">Science</div>
+        <p class="team-bio">Writes on linguistics, cognitive science, and the evolution of human communication.</p>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar" style="background:#2a6a5a">YA</div>
+        <div class="team-name">Dr. Yusuf Adewale</div>
+        <div class="team-role">Health & Science</div>
+        <p class="team-bio">Physician and researcher. Translates complex science for general readers without losing rigour.</p>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar" style="background:#6a4a2a">LN</div>
+        <div class="team-name">Linh Nguyen</div>
+        <div class="team-role">Technology</div>
+        <p class="team-bio">Former software engineer. Writes on the social consequences of technology systems.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- CONTACT PAGE                                          -->
+<!-- ══════════════════════════════════════════════════════ -->
+<main class="page" id="page-contact">
+  <div class="contact-hero">
+    <h1>Get in Touch</h1>
+    <p>Pitches, corrections, partnership enquiries, or just to say hello.</p>
+  </div>
+
+  <div class="contact-wrap">
+    <div class="contact-form">
+      <div class="form-success" id="formSuccess">
+        ✓ Message sent — we'll be in touch within two business days.
+      </div>
+      <form id="contactForm" onsubmit="submitContact(event)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <div class="form-group">
+            <label class="form-label">First name</label>
+            <input class="form-input" type="text" placeholder="Jane" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last name</label>
+            <input class="form-input" type="text" placeholder="Smith" required/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email address</label>
+          <input class="form-input" type="email" placeholder="jane@example.com" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject</label>
+          <select class="form-input">
+            <option>Editorial pitch</option>
+            <option>Correction or feedback</option>
+            <option>Subscription support</option>
+            <option>Partnership enquiry</option>
+            <option>Something else</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message</label>
+          <textarea class="form-textarea" placeholder="Tell us what's on your mind…" required></textarea>
+        </div>
+        <button class="form-submit" type="submit">Send Message →</button>
+      </form>
+    </div>
+
+    <div class="contact-info">
+      <h2>Contact Information</h2>
+      <div class="info-item">
+        <div class="info-label">Editorial</div>
+        <div class="info-value">editorial@meridian.pub</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Subscriptions</div>
+        <div class="info-value">hello@meridian.pub</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Response time</div>
+        <div class="info-value">Within 2 business days</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Pitches</div>
+        <div class="info-value">We read every pitch. We particularly welcome science, economics, and international perspectives.</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Location</div>
+        <div class="info-value">Independent & distributed — our team works across three continents.</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Footer (shown on all pages) -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="site-logo" style="font-size:1.1rem">The<span style="color:var(--accent-dim)">Meridian</span></div>
+      <p>Independent long-form journalism for curious people. Published weekly since 2024. Reader-supported.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Navigate</h4>
+      <ul>
+        <li><a onclick="navigate('home')">Home</a></li>
+        <li><a onclick="navigate('blog')">Blog</a></li>
+        <li><a onclick="navigate('about')">About</a></li>
+        <li><a onclick="navigate('contact')">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Topics</h4>
+      <ul>
+        <li><a onclick="navigate('blog')">Culture</a></li>
+        <li><a onclick="navigate('blog')">Science</a></li>
+        <li><a onclick="navigate('blog')">Economics</a></li>
+        <li><a onclick="navigate('blog')">Design</a></li>
+        <li><a onclick="navigate('blog')">Technology</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Use</a></li>
+        <li><a href="#">Corrections</a></li>
+        <li><a href="#">RSS Feed</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 The Meridian. All rights reserved.</span>
+    <span>Built with semantic HTML5, CSS3 & vanilla JS · No tracking</span>
+  </div>
+</footer>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─── DATA ───────────────────────────────────────────── */
+const ARTICLES = {
+  expertise: {
+    tag:'Culture', readTime:'8 min', title:'The Slow Collapse of Expertise in the Digital Age',
+    deck:'When everyone can publish instantly, what happens to the careful accumulation of knowledge?',
+    author:'Eleanor Marsh', initials:'EM', date:'March 22, 2025',
+    imgClass:'art-1',
+    body:`<p>In 1970, sociologist Alvin Toffler coined the term "information overload" in <em>Future Shock</em>. He was worried about what too much data might do to decision-making. He could not have imagined the scale of what was coming.</p>
+    <h2>The Credential Collapse</h2>
+    <p>For most of human history, expertise was validated by scarcity. You became an expert by spending years in proximity to other experts — in universities, guilds, ateliers, hospitals. The knowledge was hard to acquire not only because it was complex but because access to it was limited.</p>
+    <p>The internet changed both sides of this equation simultaneously. It made information abundant and it made credentialing visible, auditable, and increasingly contested. Anyone can now see that the expert has gaps, makes mistakes, and holds opinions shaped by their social position.</p>
+    <blockquote>The problem is not that we have too much information. The problem is that we have dismantled the institutions that helped us decide which information to trust.</blockquote>
+    <h2>What Comes After Trust</h2>
+    <p>The question is not whether expertise will survive the internet — it will, in various forms — but what replaces the social scaffolding that once made it legible. Peer review, editorial standards, professional licensing: these were imperfect instruments, but they were instruments. What are the equivalents today?</p>
+    <p>Several candidates have emerged: crowd-sourced verification, algorithmic curation, platform moderation. None has proven adequate. Each has introduced its own distortions, its own failure modes, its own susceptibility to gaming and capture.</p>
+    <p>The honest answer is that we don't yet have a replacement. We are living through the interregnum — the period between the collapse of old epistemic institutions and the emergence of whatever comes next. That is uncomfortable. It is also genuinely interesting.</p>
+    <h2>Reasons for Cautious Optimism</h2>
+    <p>Not everything in this picture is grim. The democratisation of publishing has surfaced knowledge that would never have reached a mainstream audience. Scientists now communicate directly with curious non-experts. Specialists in obscure fields have found global audiences. The transaction costs of sharing knowledge have fallen dramatically.</p>
+    <p>What we need are not better gatekeepers but better filters — tools and practices that help people navigate abundance without simply reinstating hierarchy. That is a design problem as much as a political one, and design problems have solutions.</p>`,
+    tags:['Culture','Media','Technology','Epistemology']
+  },
+  cities: {
+    tag:'Urban Life', readTime:'6 min', title:'Why the 15-Minute City Became a Culture War',
+    deck:'A planning concept from the 1990s resurfaces and immediately becomes a flashpoint.',
+    author:'Elena Marsh', initials:'EM', date:'March 19, 2025',
+    imgClass:'art-2',
+    body:`<p>The 15-minute city is a simple idea. Carlos Moreno, an urban scientist at the Sorbonne, proposed that every urban resident should be able to meet their daily needs — work, shopping, healthcare, education, leisure — within a 15-minute walk or cycle of their home.</p>
+    <h2>From Planning to Conspiracy</h2>
+    <p>Within months of Paris beginning to implement the concept — closing some roads to car traffic, investing in cycling infrastructure — it had become the subject of international conspiracy theories. The claim: that the 15-minute city was a pretext for trapping people in their neighbourhoods, surveilling their movements, and limiting their freedom.</p>
+    <p>This is not a summary of a fringe position. It spread widely. British politicians debated it in Parliament. American media personalities with audiences in the millions broadcast it. Protests were held in Oxford over proposals that were, at their most contentious, about removing through traffic from residential streets.</p>
+    <blockquote>Every generation gets the urban planning debate it deserves. Ours is apparently about whether a bicycle lane is a precursor to totalitarianism.</blockquote>
+    <h2>What the Backlash Reveals</h2>
+    <p>The intensity of the reaction is, in its way, informative. It tells us something about deep anxieties around mobility and freedom — and about the degree to which the car has become, for many people, inseparable from the concept of autonomy itself.</p>
+    <p>To question the primacy of the car in urban space is, for a significant constituency, to question something far more fundamental. The 15-minute city didn't create this anxiety. It merely gave it a new object.</p>`,
+    tags:['Urban Planning','Politics','Culture']
+  },
+  sleep: {
+    tag:'Science', readTime:'7 min', title:'The Science of Sleep Debt Is More Complicated Than You Think',
+    deck:'New research challenges the popular "sleep bank" model.',
+    author:'Dr. Yusuf Adewale', initials:'YA', date:'March 17, 2025',
+    imgClass:'art-3',
+    body:`<p>The phrase "catching up on sleep" is so embedded in common parlance that few people question whether it describes something real. You work late all week, sleep in on Saturday, and feel restored. The sleep bank model — debt accumulated, debt repaid — seems intuitively correct.</p>
+    <h2>What the Research Actually Shows</h2>
+    <p>A 2024 study published in <em>Current Biology</em> tracked cognitive performance across extended periods of sleep restriction and recovery. The findings were sobering. While some cognitive deficits recovered quickly after compensatory sleep, others — particularly in sustained attention and certain forms of memory consolidation — showed persistent impairment even after full recovery sleep was achieved.</p>
+    <p>The implications are significant. If sleep debt is not fully repayable in the short term, the implications for shift workers, medical residents, and the millions of people who routinely sacrifice sleep for productivity extend beyond feeling groggy on Monday morning.</p>
+    <h2>Individual Variation</h2>
+    <p>Perhaps the most important finding in recent sleep science is the degree to which individual responses to sleep deprivation vary. Some people — the so-called "short sleepers," thought to represent around 1-3% of the population — appear genuinely capable of functioning on six hours or fewer. For the vast majority, this is not the case.</p>
+    <p>The problem is that sleep-deprived people are also poor judges of their own impairment. Laboratory studies consistently show that subjects who rate themselves as "adapted" to reduced sleep perform significantly worse on objective measures than they believe themselves to be doing. This has important implications for any context where people make decisions about their own readiness to perform.</p>`,
+    tags:['Science','Health','Research']
+  },
+  design: {
+    tag:'Design', readTime:'9 min', title:'Bauhaus at 100: What Architecture Got Wrong',
+    deck:'The movement promised to unite art and industry. A century later, its legacy is ambivalent.',
+    author:'Sofia Reinholt', initials:'SR', date:'March 14, 2025',
+    imgClass:'art-4',
+    body:`<p>When the Bauhaus school opened in Weimar in 1919, Walter Gropius announced an intention as ambitious as any in the history of design: to end the separation between fine art and craft, to create objects that were beautiful and useful and affordable, to bring good design to everyone.</p>
+    <h2>The Vision</h2>
+    <p>The school attracted extraordinary talent. Paul Klee taught there. Wassily Kandinsky taught there. Marcel Breuer designed his famous cantilevered chair in its workshops. The work produced was genuinely innovative — clean lines, functional forms, a rejection of ornament for its own sake.</p>
+    <p>The influence on twentieth-century design was immense and largely uncontested. The aesthetic of countless apartment blocks, office buildings, product designs, and typographic systems traces back, directly or indirectly, to ideas developed at the Bauhaus and the international style it spawned.</p>
+    <h2>The Problem With Purity</h2>
+    <p>But a century on, it is possible to see the limits of the Bauhaus project more clearly. The commitment to function above ornament, to the universal over the local, produced buildings that were clean and often cold — spaces that satisfied the eye of the architect more reliably than the needs of the inhabitant.</p>
+    <blockquote>The genius of the Bauhaus was its rejection of nostalgia. Its failure was the assumption that what followed nostalgia must be abstraction.</blockquote>
+    <p>The high-rise social housing blocks that became the architectural expression of this logic in the postwar period were, in many cases, genuinely catastrophic. Functionalism, it turned out, had underestimated the functions that it was eliminating: the street, the corner, the ornamental detail that gives a building legibility and a neighbourhood identity.</p>`,
+    tags:['Architecture','Design','History']
+  },
+  economy: {
+    tag:'Economics', readTime:'5 min', title:'The Hidden Costs of Remote Work Nobody Talks About',
+    deck:'Beyond commutes and coffee shops, a deeper accounting reveals surprising value transfers.',
+    author:'Marcus Chen', initials:'MC', date:'March 11, 2025',
+    imgClass:'art-5',
+    body:`<p>The economic debate around remote work has largely been framed in terms of productivity: are remote workers more or less productive than office workers? The evidence, after four years of mass experience, is complicated and contested. But this framing misses something important.</p>
+    <h2>Who Pays for What</h2>
+    <p>When an employee works from home, certain costs that were previously borne by employers are transferred to employees: electricity, heating and cooling, internet connectivity, furniture, and office equipment. These are not trivial sums. UK surveys have estimated the additional household costs of remote work at between £600 and £1,500 per year.</p>
+    <p>At the same time, employees capture certain savings: commuting costs, work clothing, and — in many cases — the ability to live in lower-cost areas. Whether the net transfer is positive or negative for workers depends heavily on individual circumstances.</p>
+    <h2>The City Problem</h2>
+    <p>The costs that have received the least attention are the ones borne by neither employers nor employees but by the urban systems that were built around the assumption of daily commuting. City-centre retail, public transport networks, the tax base of dense urban areas: all of these were predicated on a model of work that has now changed significantly for a substantial portion of the workforce.</p>
+    <p>These are collective costs distributed across populations that had no say in the decisions that created them. They appear in local government budgets, in the closure of small businesses in commercial districts, and in the under-utilisation of transit infrastructure that remains expensive to maintain regardless of how many people use it.</p>`,
+    tags:['Economics','Work','Cities']
+  },
+  language: {
+    tag:'Language', readTime:'11 min', title:'How Languages Die: A Quiet Catastrophe',
+    deck:'A language disappears roughly every two weeks, carrying an irreplaceable model of the world.',
+    author:'Amara Osei', initials:'AO', date:'March 8, 2025',
+    imgClass:'art-6',
+    body:`<p>Ethnologue, the definitive catalogue of the world's languages, currently lists approximately 7,168 living languages. By the end of this century, linguists estimate that between 50 and 90 percent of these will no longer be spoken.</p>
+    <h2>The Mechanics of Language Death</h2>
+    <p>Languages don't die in the way that species do, through the death of the last individual. They die through abandonment — through the decision, made by thousands of families across generations, to raise children in a language other than the one they grew up speaking. The process is typically driven by economic and social pressure: speaking the dominant language of a region opens opportunities, reduces stigma, and signals belonging.</p>
+    <p>The last speakers of dying languages are typically older adults. In many cases, they have no one to speak their language with. The knowledge they carry — grammatical structures, vocabulary, oral literature, ways of categorising the world — exists nowhere else.</p>
+    <h2>What Is Lost</h2>
+    <p>The diversity of human languages is not merely an anthropological curiosity. Different languages encode different conceptual structures. The Guugu Yimithirr language of Australia uses cardinal directions (north, south, east, west) where English would use relative directions (left, right, in front, behind). Speakers of Guugu Yimithirr maintain a continuous, unconscious awareness of their geographic orientation as a result — a cognitive capacity that appears genuinely difficult to develop as an adult through any other means.</p>
+    <blockquote>Each language is a unique experiment in what human minds can do. When we lose a language, we lose data about the range of human cognitive possibility.</blockquote>
+    <p>This is not sentimentality. It is an epistemic loss. We are reducing the diversity of the tools available to human thought, and we are doing it faster than we can document what is disappearing.</p>`,
+    tags:['Language','Linguistics','Culture','Science']
+  },
+  privacy: {
+    tag:'Technology', readTime:'8 min', title:'Privacy Is Dead. Here\'s Why That Matters Less Than You Think',
+    deck:'The surveillance debates of the 2010s gave way to a collective shrug. What happened to our outrage?',
+    author:'Eleanor Marsh', initials:'EM', date:'March 5, 2025',
+    imgClass:'art-1',
+    body:`<p>In 2013, Edward Snowden revealed the scope of NSA surveillance. For a moment, it seemed as though something might change. There were congressional hearings. There was an international debate. There were opinion polls showing that large majorities of Americans were concerned about government surveillance of their communications.</p>
+    <p>Then nothing very much changed. The programmes continued in modified forms. The companies continued to collect data. The users continued to use the services.</p>
+    <h2>The Privacy Paradox</h2>
+    <p>Researchers who study the gap between expressed privacy preferences and actual behaviour have a name for it: the privacy paradox. People say they care about privacy. Then they share their location with apps, accept cookies, post personal information on social media, and choose the convenient option over the private one.</p>
+    <p>The standard explanation is that people are hypocritical or short-sighted. A more charitable interpretation is that they are making a rational calculation. The costs of surveillance are diffuse, uncertain, and future. The benefits of convenience are immediate and concrete. It is not irrational to discount the first in favour of the second.</p>
+    <h2>A Different Frame</h2>
+    <p>The privacy advocates of the 2010s framed the problem in terms of individual rights: your data, your choice. This framing, while principled, may have been strategically mistaken. It placed the burden of protection on individuals and invited the response that people who had nothing to hide had nothing to fear.</p>
+    <p>A different framing — one that is beginning to gain traction — treats privacy as a collective rather than individual good. Surveillance doesn't just affect the people being surveilled. It affects what they say, what they think, who they associate with. The chilling effect of surveillance is a social phenomenon, not an individual one.</p>`,
+    tags:['Technology','Privacy','Politics']
+  },
+  attention: {
+    tag:'Long-form', readTime:'42 min', title:'The Attention Economy and the Death of Boredom',
+    deck:'A three-part investigation into how the race for engagement has reshaped human consciousness.',
+    author:'Eleanor Marsh', initials:'EM', date:'March 1, 2025',
+    imgClass:'art-2',
+    body:`<p>Part one of three.</p>
+    <p>Boredom is an underrated state. Before we had smartphones, before we had social media, before we had streaming video available on demand from every surface, boredom was a common human experience. You waited. Your mind wandered. Sometimes, something interesting happened in the wandering.</p>
+    <h2>Part I: The Manufacture of Wanting</h2>
+    <p>The attention economy is not really about attention. It is about desire — the manufacture of an appetite that can never quite be satisfied. Every feed, every recommendation engine, every notification is designed not to give you what you want but to make you want to keep looking.</p>
+    <p>This is not a new insight. It was articulated by media critics decades before the smartphone. What is new is the sophistication and ubiquity of the mechanisms, and the degree to which we have internalised them. We have not just changed our media habits. We have changed our expectations of mental states.</p>
+    <h2>The Texture of Experience</h2>
+    <p>Consider what used to happen in the moments between activities. Standing in a queue. Waiting for a meeting to start. Riding public transport. In these spaces, the mind had nothing external to process. It turned inward. It made connections. It rehearsed conversations, planned futures, worked through problems whose solutions later arrived as apparent inspiration.</p>
+    <p>These interstitial spaces have not disappeared, but they have been colonised. We fill them immediately. The queue becomes an opportunity to check messages. The waiting room becomes a chance to scroll. We have, in aggregate, abolished a significant portion of the unstructured time that previously existed in a human life.</p>
+    <blockquote>We have not just changed our media habits. We have restructured the interior landscape of the mind, and done so with almost no collective deliberation about whether this is something we wanted.</blockquote>
+    <h2>What We Have Lost</h2>
+    <p>The research on what is sometimes called "default mode network" activity — what the brain does when it is not directed at external tasks — suggests that this apparent idleness is anything but. The default mode network is active in consolidating memories, integrating disparate information, developing a coherent sense of self, and generating creative thought.</p>
+    <p>We have, in other words, been industriously undermining a cognitive function that is not well understood but is clearly important. The consequences are beginning to be visible in data on creativity, in reports from teachers about declining capacity for sustained attention, and in a pervasive cultural sense that something in our collective cognitive life has shifted in ways that are difficult to articulate but hard to deny.</p>`,
+    tags:['Attention','Media','Technology','Psychology']
+  }
+};
+
+const ALL_POSTS = [
+  {slug:'expertise', tag:'culture', category:'culture'},
+  {slug:'cities',   tag:'Urban Life', category:'culture'},
+  {slug:'sleep',    tag:'science',  category:'science'},
+  {slug:'design',   tag:'design',   category:'design'},
+  {slug:'economy',  tag:'economics',category:'economics'},
+  {slug:'language', tag:'language', category:'culture'},
+  {slug:'privacy',  tag:'technology',category:'technology'},
+  {slug:'attention',tag:'Long-form', category:'culture'},
+];
+
+/* ─── ROUTER ─────────────────────────────────────────── */
+let currentPage = 'home';
+function navigate(page, data) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(n=>n.classList.remove('active'));
+  if(page==='article'){
+    loadArticle(data.slug);
+    document.getElementById('page-article').classList.add('active');
+    document.getElementById('nav-blog').classList.add('active');
+  } else {
+    document.getElementById('page-'+page).classList.add('active');
+    const navEl = document.getElementById('nav-'+page);
+    if(navEl) navEl.classList.add('active');
+  }
+  currentPage = page;
+  window.scrollTo({top:0, behavior:'smooth'});
+  closeMobileMenu();
+  if(page==='blog') renderBlogGrid(null);
+  setTimeout(observeFadeUps, 100);
+}
+
+/* ─── ARTICLE LOADER ─────────────────────────────────── */
+function loadArticle(slug){
+  const a = ARTICLES[slug]; if(!a) return;
+  document.getElementById('artEyebrow').innerHTML = `${a.tag} <span>·</span> ${a.readTime} read`;
+  document.getElementById('artTitle').innerHTML = a.title;
+  document.getElementById('artDeck').textContent = a.deck;
+  document.getElementById('artAuthor').textContent = a.author;
+  document.getElementById('artDate').textContent = a.date;
+  document.getElementById('artAvatar').textContent = a.initials;
+  const img = document.getElementById('artImg');
+  img.className = 'article-img '+a.imgClass;
+  img.textContent = '';
+  document.getElementById('artBody').innerHTML = a.body;
+  const tagsHtml = a.tags.map(t=>`<span class="tag-pill">${t}</span>`).join('');
+  document.getElementById('artTags').innerHTML = tagsHtml;
+}
+
+/* ─── BLOG GRID ──────────────────────────────────────── */
+function renderBlogGrid(filter){
+  const posts = filter ? ALL_POSTS.filter(p=>p.category===filter) : ALL_POSTS;
+  const artPalette = ['art-1','art-2','art-3','art-4','art-5','art-6'];
+  const svgBg = [
+    '<svg viewBox="0 0 320 180"><rect x="20" y="60" width="30" height="120" fill="rgba(255,255,255,.06)"/><rect x="60" y="40" width="30" height="140" fill="rgba(255,255,255,.09)"/><rect x="140" y="30" width="40" height="150" fill="rgba(255,255,255,.12)"/><rect x="270" y="45" width="30" height="135" fill="rgba(255,255,255,.1)"/></svg>',
+    '<svg viewBox="0 0 320 180"><circle cx="160" cy="90" r="60" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/><circle cx="160" cy="90" r="30" fill="rgba(255,255,255,.07)"/></svg>',
+    '<svg viewBox="0 0 320 180"><rect x="60" y="40" width="80" height="80" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="1"/><circle cx="220" cy="90" r="40" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/></svg>',
+    '<svg viewBox="0 0 320 180"><polyline points="20,150 80,100 140,120 200,60 280,40" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="2"/></svg>',
+    '<svg viewBox="0 0 320 180"><text x="30" y="100" fill="rgba(255,255,255,.08)" font-size="64" font-family="serif">Aa</text><text x="200" y="80" fill="rgba(255,255,255,.06)" font-size="48" font-family="serif">Bb</text></svg>',
+    '<svg viewBox="0 0 320 180"><rect x="110" y="50" width="100" height="80" rx="8" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="1.5"/><circle cx="160" cy="90" r="15" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="1.5"/></svg>',
+  ];
+  const grid = document.getElementById('blogGrid');
+  grid.innerHTML = posts.map((p,i)=>{
+    const a = ARTICLES[p.slug]; if(!a) return '';
+    const idx = i % 6;
+    return `<article class="blog-card fade-up" onclick="navigate('article',{slug:'${p.slug}'})">
+      <div class="bc-tag">${a.tag}</div>
+      <h3 class="bc-title">${a.title}</h3>
+      <p class="bc-excerpt">${a.deck}</p>
+      <div class="bc-meta"><span>${a.author}</span><span>${a.date}</span><span>${a.readTime} read</span></div>
+    </article>`;
+  }).join('');
+  setTimeout(observeFadeUps, 80);
+}
+
+function filterPosts(cat, btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBlogGrid(cat==='all' ? null : cat);
+}
+
+/* ─── MOBILE MENU ────────────────────────────────────── */
+function toggleMenu(){
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+function closeMobileMenu(){
+  document.getElementById('mobileMenu').classList.remove('open');
+}
+
+/* ─── FORMS ──────────────────────────────────────────── */
+function subscribeNewsletter(e){
+  e.preventDefault();
+  showToast('Subscribed! First issue arrives Wednesday.');
+  e.target.reset();
+}
+function submitContact(e){
+  e.preventDefault();
+  document.getElementById('contactForm').style.display='none';
+  document.getElementById('formSuccess').style.display='block';
+  showToast('Message sent successfully.');
+}
+
+/* ─── TOAST ──────────────────────────────────────────── */
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+/* ─── READING BAR ────────────────────────────────────── */
+window.addEventListener('scroll', ()=>{
+  const bar = document.getElementById('readingBar');
+  const docH = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = docH > 0 ? (window.scrollY / docH) * 100 : 0;
+  bar.style.width = pct + '%';
+});
+
+/* ─── FADE-UP OBSERVER ───────────────────────────────── */
+function observeFadeUps(){
+  const els = document.querySelectorAll('.fade-up:not(.visible)');
+  if(!('IntersectionObserver' in window)){
+    els.forEach(el=>el.classList.add('visible')); return;
+  }
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach((entry,i)=>{
+      if(entry.isIntersecting){
+        setTimeout(()=>entry.target.classList.add('visible'), i*80);
+        obs.unobserve(entry.target);
+      }
+    });
+  },{threshold:.12});
+  els.forEach(el=>obs.observe(el));
+}
+
+/* ─── INIT ───────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', ()=>{
+  navigate('home');
+  observeFadeUps();
+  document.getElementById('nav-home').classList.add('active');
+});
+</script>
+</body>
+</html>

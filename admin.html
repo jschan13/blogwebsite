@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Meridian Admin — Content Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@300;400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --ink:#0f0f0f; --ink-light:#3a3a3a; --ink-faint:#888;
+  --paper:#faf8f4; --paper-warm:#f2ede5; --rule:#d4cfc8;
+  --accent:#1a5c3a; --accent-lt:#e8f2ec; --accent-dim:#2d7a52;
+  --white:#ffffff; --danger:#c0392b; --warn:#d97706;
+  --ff-display:'Playfair Display',Georgia,serif;
+  --ff-mono:'DM Mono',monospace;
+  --ff-ui:'Inter',system-ui,sans-serif;
+  --sidebar:260px; --radius:6px; --transition:.2s ease;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:15px;}
+body{font-family:var(--ff-ui);background:#f5f4f0;color:var(--ink);-webkit-font-smoothing:antialiased;display:flex;min-height:100vh;}
+a{color:inherit;text-decoration:none;}
+button,input,textarea,select{font-family:inherit;}
+
+/* ─── SIDEBAR ───────────────── */
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--ink);color:var(--white);
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+.sb-brand{padding:28px 20px 20px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sb-logo{font-family:var(--ff-display);font-size:1rem;font-weight:900;letter-spacing:.04em;}
+.sb-logo span{color:var(--accent-dim);}
+.sb-label{font-family:var(--ff-mono);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:4px;}
+.sb-nav{padding:16px 0;flex:1;}
+.sb-section{font-family:var(--ff-mono);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.25);padding:16px 20px 8px;}
+.sb-link{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 20px;font-size:.85rem;
+  color:rgba(255,255,255,.55);cursor:pointer;
+  transition:var(--transition);border-left:3px solid transparent;
+}
+.sb-link:hover{color:var(--white);background:rgba(255,255,255,.06);}
+.sb-link.active{color:var(--white);background:rgba(255,255,255,.1);border-left-color:var(--accent-dim);}
+.sb-link .icon{width:16px;height:16px;opacity:.7;flex-shrink:0;}
+.sb-count{margin-left:auto;background:rgba(255,255,255,.12);font-family:var(--ff-mono);font-size:.58rem;padding:2px 7px;border-radius:99px;}
+.sb-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;}
+.sb-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:600;flex-shrink:0;}
+.sb-user-name{font-size:.82rem;font-weight:500;}
+.sb-user-role{font-family:var(--ff-mono);font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);}
+
+/* ─── MAIN ───────────────────── */
+.main{flex:1;overflow-x:hidden;}
+.topbar{
+  background:var(--white);border-bottom:1px solid var(--rule);
+  padding:0 32px;height:60px;
+  display:flex;align-items:center;gap:16px;
+  position:sticky;top:0;z-index:50;
+}
+.topbar-title{font-size:1rem;font-weight:600;}
+.topbar-breadcrumb{font-family:var(--ff-mono);font-size:.62rem;letter-spacing:.06em;color:var(--ink-faint);}
+.topbar-actions{margin-left:auto;display:flex;gap:10px;}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 16px;border-radius:var(--radius);
+  font-size:.8rem;font-weight:500;cursor:pointer;border:none;
+  transition:var(--transition);
+}
+.btn-primary{background:var(--accent);color:var(--white);}
+.btn-primary:hover{background:var(--accent-dim);}
+.btn-ghost{background:transparent;color:var(--ink-light);border:1.5px solid var(--rule);}
+.btn-ghost:hover{background:var(--paper-warm);}
+.btn-danger{background:transparent;color:var(--danger);border:1.5px solid #fca5a5;}
+.btn-danger:hover{background:#fef2f2;}
+.btn-sm{padding:5px 12px;font-size:.75rem;}
+
+/* ─── VIEWS ──────────────────── */
+.view{display:none;}
+.view.active{display:block;}
+.content{padding:32px;}
+
+/* ─── DASHBOARD ──────────────── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;}
+@media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
+.stat-card{background:var(--white);border:1px solid var(--rule);border-radius:var(--radius);padding:20px 22px;}
+.stat-num{font-family:var(--ff-display);font-size:2rem;font-weight:900;line-height:1;margin-bottom:6px;}
+.stat-label{font-family:var(--ff-mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);}
+.stat-change{font-size:.75rem;margin-top:8px;}
+.stat-change.up{color:var(--accent);}
+.stat-change.down{color:var(--danger);}
+
+.dashboard-grid{display:grid;grid-template-columns:1fr 340px;gap:24px;}
+@media(max-width:900px){.dashboard-grid{grid-template-columns:1fr;}}
+
+/* ─── PANEL ──────────────────── */
+.panel{background:var(--white);border:1px solid var(--rule);border-radius:var(--radius);}
+.panel-head{padding:16px 20px;border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;}
+.panel-head h3{font-size:.85rem;font-weight:600;}
+.panel-body{padding:0;}
+
+/* ─── POST TABLE ─────────────── */
+.post-table{width:100%;border-collapse:collapse;}
+.post-table th{font-family:var(--ff-mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);padding:10px 16px;text-align:left;border-bottom:1px solid var(--rule);background:var(--paper);}
+.post-table td{padding:12px 16px;border-bottom:1px solid var(--rule);font-size:.85rem;vertical-align:middle;}
+.post-table tr:last-child td{border-bottom:none;}
+.post-table tr:hover td{background:#faf8f4;}
+.post-title-cell{font-weight:500;cursor:pointer;color:var(--ink);}
+.post-title-cell:hover{color:var(--accent);}
+.post-status{display:inline-block;font-family:var(--ff-mono);font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:99px;}
+.status-published{background:#d1fae5;color:#065f46;}
+.status-draft{background:#fef3c7;color:#92400e;}
+.post-actions{display:flex;gap:6px;}
+.action-btn{background:none;border:none;cursor:pointer;padding:4px;border-radius:4px;color:var(--ink-faint);transition:var(--transition);}
+.action-btn:hover{background:var(--paper-warm);color:var(--ink);}
+.action-btn.del:hover{background:#fef2f2;color:var(--danger);}
+
+/* ─── EDITOR ─────────────────── */
+.editor-layout{display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start;}
+@media(max-width:900px){.editor-layout{grid-template-columns:1fr;}}
+.form-group{margin-bottom:20px;}
+.form-label{display:block;font-family:var(--ff-mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px;}
+.form-label .req{color:var(--danger);}
+.form-control{
+  width:100%;border:1.5px solid var(--rule);border-radius:var(--radius);
+  padding:10px 14px;font-size:.9rem;background:var(--white);color:var(--ink);
+  outline:none;transition:border-color var(--transition);
+}
+.form-control:focus{border-color:var(--accent);}
+textarea.form-control{min-height:320px;resize:vertical;font-family:'Georgia',serif;font-size:.95rem;line-height:1.72;}
+.meta-panel{background:var(--white);border:1px solid var(--rule);border-radius:var(--radius);padding:20px;}
+.meta-panel h4{font-size:.78rem;font-weight:600;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--rule);}
+.meta-group{margin-bottom:16px;}
+.meta-label{font-family:var(--ff-mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px;display:block;}
+.img-dropzone{
+  border:2px dashed var(--rule);border-radius:var(--radius);
+  padding:28px 20px;text-align:center;cursor:pointer;
+  transition:var(--transition);background:var(--paper);
+}
+.img-dropzone:hover{border-color:var(--accent);background:var(--accent-lt);}
+.img-dropzone p{font-size:.8rem;color:var(--ink-faint);margin-top:8px;}
+.img-dropzone strong{font-size:.75rem;color:var(--accent);}
+.toolbar{display:flex;gap:4px;flex-wrap:wrap;padding:8px;background:var(--paper);border:1.5px solid var(--rule);border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;}
+.toolbar-btn{background:none;border:none;cursor:pointer;padding:5px 9px;border-radius:4px;font-size:.8rem;color:var(--ink-light);font-family:var(--ff-mono);transition:var(--transition);}
+.toolbar-btn:hover{background:var(--rule);}
+.toolbar-btn.bold{font-weight:700;}
+.toolbar-btn.italic{font-style:italic;}
+.connected-input{border-top-left-radius:0;border-top-right-radius:0;}
+
+/* ─── ACTIVITY FEED ──────────────────────────── */
+.activity-item{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--rule);align-items:flex-start;}
+.activity-item:last-child{border-bottom:none;}
+.activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.dot-green{background:var(--accent);}
+.dot-amber{background:var(--warn);}
+.dot-gray{background:var(--rule);}
+.activity-text{font-size:.82rem;line-height:1.5;flex:1;}
+.activity-text strong{font-weight:600;}
+.activity-time{font-family:var(--ff-mono);font-size:.58rem;color:var(--ink-faint);white-space:nowrap;}
+
+/* ─── TAGS INPUT ──────────────── */
+.tags-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.tag-chip{background:var(--accent-lt);color:var(--accent);font-family:var(--ff-mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:99px;display:flex;align-items:center;gap:4px;}
+.tag-chip button{background:none;border:none;cursor:pointer;color:var(--accent);font-size:.8rem;line-height:1;padding:0;}
+
+/* ─── MEDIA GRID ──────────────── */
+.media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;}
+.media-item{aspect-ratio:1;border-radius:var(--radius);border:1.5px solid var(--rule);overflow:hidden;position:relative;cursor:pointer;transition:var(--transition);}
+.media-item:hover{border-color:var(--accent);}
+.media-item-bg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem;background:var(--paper-warm);}
+.media-item-name{position:absolute;bottom:0;left:0;right:0;background:rgba(15,15,15,.7);color:#fff;font-family:var(--ff-mono);font-size:.55rem;padding:5px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.media-upload{border:2px dashed var(--rule);aspect-ratio:1;border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:var(--transition);color:var(--ink-faint);gap:8px;}
+.media-upload:hover{border-color:var(--accent);background:var(--accent-lt);}
+
+/* ─── SETTINGS ────────────────── */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+@media(max-width:700px){.settings-grid{grid-template-columns:1fr;}}
+
+/* ─── SAVE TOAST ─────────────── */
+.save-toast{position:fixed;bottom:28px;right:28px;background:var(--ink);color:#fff;padding:12px 18px;border-radius:var(--radius);font-size:.8rem;border-left:4px solid var(--accent);transform:translateY(12px);opacity:0;transition:all .25s;z-index:999;pointer-events:none;}
+.save-toast.show{transform:translateY(0);opacity:1;}
+
+/* ─── CONFIRM DIALOG ─────────────── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.dialog{background:var(--white);border-radius:var(--radius);padding:28px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+.dialog h3{font-size:1rem;font-weight:600;margin-bottom:10px;}
+.dialog p{font-size:.85rem;color:var(--ink-light);margin-bottom:24px;line-height:1.6;}
+.dialog-actions{display:flex;gap:10px;justify-content:flex-end;}
+
+/* RESPONSIVE */
+@media(max-width:680px){
+  .sidebar{display:none;}
+  .content{padding:20px;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">The<span>Meridian</span></div>
+    <div class="sb-label">Content Manager</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Overview</div>
+    <div class="sb-link active" onclick="showView('dashboard',this)">
+      <svg class="icon" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+      Dashboard
+    </div>
+    <div class="sb-section">Content</div>
+    <div class="sb-link" onclick="showView('posts',this)">
+      <svg class="icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h8M2 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      All Posts
+      <span class="sb-count">8</span>
+    </div>
+    <div class="sb-link" onclick="showView('editor',this);newPost()">
+      <svg class="icon" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      New Post
+    </div>
+    <div class="sb-link" onclick="showView('media',this)">
+      <svg class="icon" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/><circle cx="5.5" cy="6.5" r="1" stroke="currentColor" stroke-width="1.2"/><path d="M1 10l4-3 3 2.5 2.5-2L15 10" stroke="currentColor" stroke-width="1.2"/></svg>
+      Media Library
+    </div>
+    <div class="sb-section">Site</div>
+    <div class="sb-link" onclick="showView('settings',this)">
+      <svg class="icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M2.64 2.64l1.42 1.42M11.94 11.94l1.42 1.42M2.64 13.36l1.42-1.42M11.94 4.06l1.42-1.42" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Site Settings
+    </div>
+    <div class="sb-link" onclick="window.open('index.html','_blank')">
+      <svg class="icon" viewBox="0 0 16 16" fill="none"><path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M9 2h5v5M14 2L8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Preview Site
+    </div>
+  </nav>
+  <div class="sb-user">
+    <div class="sb-avatar">EM</div>
+    <div>
+      <div class="sb-user-name">Eleanor Marsh</div>
+      <div class="sb-user-role">Admin</div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-breadcrumb" id="topbarCrumb">The Meridian CMS</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="showView('posts',document.querySelector('[onclick*=posts]'))">← All Posts</button>
+      <button class="btn btn-primary btn-sm" id="topbarSaveBtn" onclick="savePost()" style="display:none">Save Post</button>
+      <button class="btn btn-primary btn-sm" onclick="showView('editor',document.querySelector('[onclick*=editor]'));newPost()" id="topbarNewBtn">+ New Post</button>
+    </div>
+  </div>
+
+  <!-- ── DASHBOARD ── -->
+  <div class="view active content" id="view-dashboard">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num">8</div>
+        <div class="stat-label">Total Posts</div>
+        <div class="stat-change up">↑ 2 this month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">6</div>
+        <div class="stat-label">Published</div>
+        <div class="stat-change up">↑ 1 this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">2</div>
+        <div class="stat-label">Drafts</div>
+        <div class="stat-change" style="color:var(--ink-faint)">Ready to review</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">12k</div>
+        <div class="stat-label">Monthly Readers</div>
+        <div class="stat-change up">↑ 18% vs last month</div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="panel">
+        <div class="panel-head"><h3>Recent Posts</h3><button class="btn btn-ghost btn-sm" onclick="showView('posts',document.querySelector('[onclick*=posts]'))">View all</button></div>
+        <table class="post-table">
+          <thead><tr><th>Title</th><th>Category</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="dashPostList"></tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Recent Activity</h3></div>
+        <div class="panel-body">
+          <div class="activity-item"><div class="activity-dot dot-green"></div><div class="activity-text"><strong>Expertise article</strong> published</div><div class="activity-time">2h ago</div></div>
+          <div class="activity-item"><div class="activity-dot dot-amber"></div><div class="activity-text"><strong>Sleep Science</strong> moved to draft</div><div class="activity-time">5h ago</div></div>
+          <div class="activity-item"><div class="activity-dot dot-green"></div><div class="activity-text"><strong>Cities article</strong> published</div><div class="activity-time">Yesterday</div></div>
+          <div class="activity-item"><div class="activity-dot dot-gray"></div><div class="activity-text">Cover image uploaded</div><div class="activity-time">2d ago</div></div>
+          <div class="activity-item"><div class="activity-dot dot-green"></div><div class="activity-text"><strong>Design article</strong> published</div><div class="activity-time">3d ago</div></div>
+          <div class="activity-item"><div class="activity-dot dot-amber"></div><div class="activity-text">Settings updated</div><div class="activity-time">5d ago</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ALL POSTS ── -->
+  <div class="view content" id="view-posts">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>All Articles</h3>
+        <div style="display:flex;gap:8px">
+          <select class="form-control" style="width:auto;padding:6px 10px;font-size:.78rem" id="filterStatus" onchange="renderPostList()">
+            <option value="">All statuses</option>
+            <option value="published">Published</option>
+            <option value="draft">Drafts</option>
+          </select>
+          <input class="form-control" type="search" placeholder="Search posts…" style="width:200px;padding:6px 12px;font-size:.8rem" id="searchPosts" oninput="renderPostList()"/>
+        </div>
+      </div>
+      <table class="post-table">
+        <thead><tr><th>Title</th><th>Author</th><th>Category</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody id="fullPostList"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── EDITOR ── -->
+  <div class="view content" id="view-editor">
+    <div class="editor-layout">
+      <div>
+        <div class="form-group">
+          <label class="form-label">Post Title <span class="req">*</span></label>
+          <input class="form-control" id="edTitle" type="text" placeholder="Enter a compelling headline…" style="font-size:1.05rem;font-weight:500"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subtitle / Deck</label>
+          <input class="form-control" id="edDeck" type="text" placeholder="One sentence that sells the piece"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Body Content <span class="req">*</span></label>
+          <div class="toolbar">
+            <button class="toolbar-btn bold" onclick="wrapText('**','**')"><b>B</b></button>
+            <button class="toolbar-btn italic" onclick="wrapText('*','*')"><i>I</i></button>
+            <button class="toolbar-btn" onclick="wrapText('## ','')">H2</button>
+            <button class="toolbar-btn" onclick="wrapText('### ','')">H3</button>
+            <button class="toolbar-btn" onclick="wrapText('> ','')">❝</button>
+            <button class="toolbar-btn" onclick="wrapText('[link text](','url)')">🔗</button>
+            <button class="toolbar-btn" onclick="wrapText('- ','')">• List</button>
+            <button class="toolbar-btn" onclick="wrapText('\n---\n','')">— Rule</button>
+          </div>
+          <textarea class="form-control connected-input" id="edBody" placeholder="Write your article here. Markdown is supported.&#10;&#10;Use ## for headings, **bold**, *italic*, > blockquotes…"></textarea>
+        </div>
+      </div>
+
+      <div>
+        <div class="meta-panel" style="margin-bottom:16px">
+          <h4>Publish</h4>
+          <div class="meta-group">
+            <span class="meta-label">Status</span>
+            <select class="form-control" id="edStatus" style="padding:8px 12px;font-size:.85rem">
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+            </select>
+          </div>
+          <div class="meta-group">
+            <span class="meta-label">Publish Date</span>
+            <input class="form-control" id="edDate" type="date" style="padding:8px 12px;font-size:.85rem"/>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="savePost()">Save Post</button>
+            <button class="btn btn-ghost" onclick="previewPost()">Preview</button>
+          </div>
+        </div>
+
+        <div class="meta-panel" style="margin-bottom:16px">
+          <h4>Post Details</h4>
+          <div class="meta-group">
+            <span class="meta-label">Author</span>
+            <select class="form-control" id="edAuthor" style="padding:8px 12px;font-size:.85rem">
+              <option>Eleanor Marsh</option>
+              <option>Marcus Chen</option>
+              <option>Sofia Reinholt</option>
+              <option>Amara Osei</option>
+              <option>Dr. Yusuf Adewale</option>
+              <option>Linh Nguyen</option>
+            </select>
+          </div>
+          <div class="meta-group">
+            <span class="meta-label">Category</span>
+            <select class="form-control" id="edCategory" style="padding:8px 12px;font-size:.85rem">
+              <option>Culture</option>
+              <option>Science</option>
+              <option>Economics</option>
+              <option>Design</option>
+              <option>Technology</option>
+              <option>Urban Life</option>
+              <option>Language</option>
+              <option>Long-form</option>
+            </select>
+          </div>
+          <div class="meta-group">
+            <span class="meta-label">Read Time (min)</span>
+            <input class="form-control" id="edReadTime" type="number" min="1" max="60" value="5" style="padding:8px 12px;font-size:.85rem"/>
+          </div>
+        </div>
+
+        <div class="meta-panel" style="margin-bottom:16px">
+          <h4>Cover Image</h4>
+          <div class="img-dropzone" id="dropzone" onclick="fakeImageUpload()">
+            <div style="font-size:1.5rem">🖼</div>
+            <strong>Click to upload</strong>
+            <p>JPG, PNG or WebP · Max 5MB</p>
+          </div>
+          <div id="imgPreview" style="display:none;margin-top:10px">
+            <div style="border-radius:var(--radius);overflow:hidden;aspect-ratio:16/9;background:linear-gradient(135deg,#1a3028,#0d1f18);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.4);font-size:.8rem">Cover image preview</div>
+            <button class="btn btn-danger btn-sm" style="margin-top:8px" onclick="removeImage()">Remove image</button>
+          </div>
+        </div>
+
+        <div class="meta-panel">
+          <h4>Tags</h4>
+          <input class="form-control" id="tagInput" type="text" placeholder="Add tag, press Enter…" style="padding:8px 12px;font-size:.82rem" onkeydown="addTag(event)"/>
+          <div class="tags-wrap" id="tagsWrap"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MEDIA ── -->
+  <div class="view content" id="view-media">
+    <div class="panel">
+      <div class="panel-head"><h3>Media Library</h3><button class="btn btn-primary btn-sm" onclick="fakeImageUpload()">+ Upload</button></div>
+      <div style="padding:20px">
+        <div class="media-grid">
+          <div class="media-upload" onclick="fakeImageUpload()">
+            <div style="font-size:1.5rem;color:var(--ink-faint)">+</div>
+            <span style="font-size:.72rem;font-family:var(--ff-mono)">Upload new</span>
+          </div>
+          <div class="media-item"><div class="media-item-bg" style="background:linear-gradient(135deg,#1a3028,#0d1f18)"></div><div class="media-item-name">cities-hero.jpg</div></div>
+          <div class="media-item"><div class="media-item-bg" style="background:linear-gradient(135deg,#1f1a30,#0d0e20)"></div><div class="media-item-name">sleep-cover.jpg</div></div>
+          <div class="media-item"><div class="media-item-bg" style="background:linear-gradient(135deg,#301a1a,#1a0d0d)"></div><div class="media-item-name">design-cover.jpg</div></div>
+          <div class="media-item"><div class="media-item-bg" style="background:linear-gradient(135deg,#1a2a30,#0d1820)"></div><div class="media-item-name">economy-hero.jpg</div></div>
+          <div class="media-item"><div class="media-item-bg" style="background:linear-gradient(135deg,#2a2a1a,#1a1a0d)"></div><div class="media-item-name">language-cover.png</div></div>
+          <div class="media-item"><div class="media-item-bg" style="background:linear-gradient(135deg,#1a1a2a,#0d0d1a)"></div><div class="media-item-name">privacy-cover.jpg</div></div>
+          <div class="media-item"><div class="media-item-bg" style="background:linear-gradient(135deg,#1a3028,#0d1f18)"></div><div class="media-item-name">logo-dark.svg</div></div>
+          <div class="media-item"><div class="media-item-bg">📄</div><div class="media-item-name">about-team.jpg</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SETTINGS ── -->
+  <div class="view content" id="view-settings">
+    <div class="settings-grid">
+      <div class="panel">
+        <div class="panel-head"><h3>Site Identity</h3></div>
+        <div style="padding:20px">
+          <div class="form-group"><label class="form-label">Site Name</label><input class="form-control" value="The Meridian"/></div>
+          <div class="form-group"><label class="form-label">Tagline</label><input class="form-control" value="Ideas Worth Reading"/></div>
+          <div class="form-group"><label class="form-label">Site Description</label><textarea class="form-control" style="min-height:80px">Independent long-form journalism for curious people. Published weekly since 2024.</textarea></div>
+          <button class="btn btn-primary" onclick="toast('Settings saved')">Save Changes</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Blog Settings</h3></div>
+        <div style="padding:20px">
+          <div class="form-group"><label class="form-label">Posts Per Page</label><input class="form-control" type="number" value="12"/></div>
+          <div class="form-group"><label class="form-label">Default Author</label><select class="form-control"><option>Eleanor Marsh</option><option>Marcus Chen</option></select></div>
+          <div class="form-group"><label class="form-label">Comments</label><select class="form-control"><option>Disabled</option><option>Enabled</option></select></div>
+          <button class="btn btn-primary" onclick="toast('Blog settings saved')">Save Changes</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Newsletter Integration</h3></div>
+        <div style="padding:20px">
+          <div class="form-group"><label class="form-label">Provider</label><select class="form-control"><option>Mailchimp</option><option>ConvertKit</option><option>Substack</option><option>Buttondown</option></select></div>
+          <div class="form-group"><label class="form-label">API Key</label><input class="form-control" type="password" value="••••••••••••"/></div>
+          <div class="form-group"><label class="form-label">List ID</label><input class="form-control" placeholder="Enter list ID…"/></div>
+          <button class="btn btn-primary" onclick="toast('Newsletter settings saved')">Save & Test</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>SEO Defaults</h3></div>
+        <div style="padding:20px">
+          <div class="form-group"><label class="form-label">Meta Title Template</label><input class="form-control" value="{post_title} — The Meridian"/></div>
+          <div class="form-group"><label class="form-label">Default Meta Description</label><textarea class="form-control" style="min-height:80px">Independent long-form journalism for curious readers.</textarea></div>
+          <div class="form-group"><label class="form-label">Twitter Handle</label><input class="form-control" value="@themeridian"/></div>
+          <button class="btn btn-primary" onclick="toast('SEO settings saved')">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Confirm Dialog -->
+<div class="overlay" id="confirmOverlay">
+  <div class="dialog">
+    <h3>Delete this post?</h3>
+    <p>This will permanently remove the article and cannot be undone.</p>
+    <div class="dialog-actions">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Save Toast -->
+<div class="save-toast" id="saveToast"></div>
+
+<script>
+const POSTS_DATA = [
+  {id:1, slug:'expertise', title:'The Slow Collapse of Expertise in the Digital Age', author:'Eleanor Marsh', category:'Culture', status:'published', date:'Mar 22, 2025', readTime:8},
+  {id:2, slug:'cities',   title:'Why the 15-Minute City Became a Culture War',         author:'Elena Marsh',    category:'Urban Life', status:'published', date:'Mar 19, 2025', readTime:6},
+  {id:3, slug:'sleep',    title:'The Science of Sleep Debt Is More Complicated Than You Think', author:'Dr. Yusuf Adewale', category:'Science', status:'published', date:'Mar 17, 2025', readTime:7},
+  {id:4, slug:'design',   title:'Bauhaus at 100: What Architecture Got Wrong',          author:'Sofia Reinholt', category:'Design', status:'published', date:'Mar 14, 2025', readTime:9},
+  {id:5, slug:'economy',  title:'The Hidden Costs of Remote Work Nobody Talks About',   author:'Marcus Chen',    category:'Economics', status:'published', date:'Mar 11, 2025', readTime:5},
+  {id:6, slug:'language', title:'How Languages Die: A Quiet Catastrophe',               author:'Amara Osei',     category:'Language', status:'published', date:'Mar 8, 2025', readTime:11},
+  {id:7, slug:'privacy',  title:"Privacy Is Dead. Here's Why That Matters Less",        author:'Eleanor Marsh',  category:'Technology', status:'draft', date:'Mar 5, 2025', readTime:8},
+  {id:8, slug:'attention',title:'The Attention Economy and the Death of Boredom',       author:'Eleanor Marsh',  category:'Long-form', status:'draft', date:'Mar 1, 2025', readTime:42},
+];
+
+let deleteTarget = null;
+let tags = [];
+
+function showView(name, el){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(l=>l.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  if(el) el.classList.add('active');
+  const titles = {dashboard:'Dashboard',posts:'All Posts',editor:'Post Editor',media:'Media Library',settings:'Site Settings'};
+  const crumbs = {dashboard:'Overview',posts:'Content',editor:'Content',media:'Content',settings:'Configuration'};
+  document.getElementById('topbarTitle').textContent = titles[name]||name;
+  document.getElementById('topbarCrumb').textContent = 'The Meridian CMS · '+(crumbs[name]||'');
+  document.getElementById('topbarSaveBtn').style.display = name==='editor' ? '' : 'none';
+  document.getElementById('topbarNewBtn').style.display  = name==='editor' ? 'none' : '';
+  if(name==='dashboard') renderDashTable();
+  if(name==='posts') renderPostList();
+}
+
+function renderDashTable(){
+  const tbody = document.getElementById('dashPostList');
+  tbody.innerHTML = POSTS_DATA.slice(0,5).map(p=>`
+    <tr>
+      <td class="post-title-cell" onclick="editPost(${p.id})">${p.title}</td>
+      <td style="color:var(--ink-faint);font-size:.8rem">${p.category}</td>
+      <td><span class="post-status status-${p.status}">${p.status}</span></td>
+      <td style="color:var(--ink-faint);font-size:.8rem;white-space:nowrap">${p.date}</td>
+    </tr>`).join('');
+}
+
+function renderPostList(){
+  const status = document.getElementById('filterStatus').value;
+  const search = document.getElementById('searchPosts').value.toLowerCase();
+  const filtered = POSTS_DATA.filter(p=>{
+    if(status && p.status!==status) return false;
+    if(search && !p.title.toLowerCase().includes(search)) return false;
+    return true;
+  });
+  document.getElementById('fullPostList').innerHTML = filtered.map(p=>`
+    <tr>
+      <td class="post-title-cell" onclick="editPost(${p.id})">${p.title}</td>
+      <td style="font-size:.82rem;color:var(--ink-faint)">${p.author}</td>
+      <td style="font-size:.8rem">${p.category}</td>
+      <td><span class="post-status status-${p.status}">${p.status}</span></td>
+      <td style="font-size:.8rem;color:var(--ink-faint);white-space:nowrap">${p.date}</td>
+      <td><div class="post-actions">
+        <button class="action-btn" title="Edit" onclick="editPost(${p.id})">✏️</button>
+        <button class="action-btn" title="Duplicate" onclick="toast('Post duplicated')">⎘</button>
+        <button class="action-btn del" title="Delete" onclick="askDelete(${p.id})">🗑</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function editPost(id){
+  const p = POSTS_DATA.find(x=>x.id===id); if(!p) return;
+  document.getElementById('edTitle').value = p.title;
+  document.getElementById('edDeck').value = 'A subtitle for this article';
+  document.getElementById('edStatus').value = p.status;
+  document.getElementById('edAuthor').value = p.author;
+  document.getElementById('edCategory').value = p.category;
+  document.getElementById('edReadTime').value = p.readTime;
+  document.getElementById('edBody').value = '# '+p.title+'\n\nStart writing your article here…\n\n## First Section\n\nContent goes here.';
+  document.getElementById('edDate').value = new Date().toISOString().split('T')[0];
+  tags = [p.category, 'Featured'];
+  renderTags();
+  showView('editor', document.querySelector('[onclick*="editor"]'));
+}
+
+function newPost(){
+  document.getElementById('edTitle').value='';
+  document.getElementById('edDeck').value='';
+  document.getElementById('edBody').value='';
+  document.getElementById('edStatus').value='draft';
+  document.getElementById('edDate').value=new Date().toISOString().split('T')[0];
+  tags=[];
+  renderTags();
+  document.getElementById('imgPreview').style.display='none';
+  document.getElementById('dropzone').style.display='block';
+}
+
+function savePost(){
+  const title = document.getElementById('edTitle').value.trim();
+  if(!title){toast('Please add a title');return;}
+  toast('Post saved successfully ✓');
+}
+
+function previewPost(){ toast('Opening preview…'); }
+
+function fakeImageUpload(){
+  document.getElementById('dropzone').style.display='none';
+  document.getElementById('imgPreview').style.display='block';
+  toast('Image uploaded');
+}
+function removeImage(){
+  document.getElementById('dropzone').style.display='block';
+  document.getElementById('imgPreview').style.display='none';
+}
+
+function wrapText(before, after){
+  const ta = document.getElementById('edBody');
+  const start = ta.selectionStart, end = ta.selectionEnd;
+  const sel = ta.value.substring(start, end);
+  const rep = before + (sel||'text') + after;
+  ta.value = ta.value.substring(0,start) + rep + ta.value.substring(end);
+  ta.focus();
+}
+
+function addTag(e){
+  if(e.key!=='Enter') return;
+  const val = e.target.value.trim();
+  if(val && !tags.includes(val)){ tags.push(val); renderTags(); }
+  e.target.value='';
+}
+function removeTag(tag){ tags=tags.filter(t=>t!==tag); renderTags(); }
+function renderTags(){
+  document.getElementById('tagsWrap').innerHTML = tags.map(t=>`
+    <span class="tag-chip">${t}<button onclick="removeTag('${t}')">×</button></span>`).join('');
+}
+
+function askDelete(id){ deleteTarget=id; document.getElementById('confirmOverlay').classList.add('open'); }
+function closeConfirm(){ document.getElementById('confirmOverlay').classList.remove('open'); deleteTarget=null; }
+function confirmDelete(){
+  if(deleteTarget){ toast('Post deleted'); closeConfirm(); }
+}
+
+function toast(msg){
+  const el = document.getElementById('saveToast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 2800);
+}
+
+// Init
+renderDashTable();
+</script>
+</body>
+</html>
